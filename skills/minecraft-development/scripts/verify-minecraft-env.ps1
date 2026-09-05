@@ -9,7 +9,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $javacCheck = javac -version 2>&1
 if ($LASTEXITCODE -ne 0) {
-    $errors += "javac not found — JRE may be installed but not JDK"
+    $errors += "javac not found - JRE may be installed but not JDK"
 } else {
     Write-Host "javac: $($javacCheck)" -ForegroundColor Green
 }

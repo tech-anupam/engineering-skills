@@ -45,7 +45,7 @@ Activate these based on project needs:
 | Skill | When to use |
 |---|---|
 | `project-discovery` | Start of any new project or feature |
-| `ui-design` | Any UI work — design system, components, fonts, images |
+| `ui-design` | Any UI work - design system, components, fonts, images |
 | `responsive-design` | Any frontend layout work |
 | `icons-and-assets` | Adding icons to UI |
 | `frontend-stack` | React/Next.js development, SEO, performance |

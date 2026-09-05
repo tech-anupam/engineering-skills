@@ -1,6 +1,10 @@
 <p align="center">
+  <img src="./logo/engineering%20skills.png" alt="engineering-skills" width="120">
+</p>
+
+<p align="center">
   <h1 align="center">engineering-skills</h1>
-  <p align="center">My personal engineering playbook, packaged as Agent Skills</p>
+  <p align="center">Personal engineering playbook, packaged as Agent Skills</p>
 </p>
 
 <p align="center">

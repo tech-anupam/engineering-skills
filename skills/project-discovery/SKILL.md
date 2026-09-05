@@ -14,35 +14,35 @@ description: Ask-first workflow that gathers project context before writing any 
 ## Instructions
 Execute the following question flow in order. Adapt follow-up questions based on the answers received.
 
-**Phase 1 — What & Why**
+**Phase 1 - What & Why**
 1. What are you building? (Demand specificity: e.g., "a SaaS dashboard for logistics", not "a website")
 2. Who are the target users? (Developers, end consumers, internal team, B2B?)
 3. What core problem does this application solve?
 
-**Phase 2 — Requirements**
+**Phase 2 - Requirements**
 4. Core requirements and must-have features?
 5. Nice-to-have features for future scope?
 6. Any reference sites or applications for inspiration?
 
-**Phase 3 — Design & UX**
+**Phase 3 - Design & UX**
 7. Preferred UI/UX style? (Offer specific options: glassmorphism, minimalism, neumorphism, brutalism, Material 3, etc.)
 8. Any established brand guidelines, colors, or fonts to strictly follow?
 9. Priority: Mobile-first or desktop-first? (Always default to mobile-first unless stated otherwise).
 
-**Phase 4 — Technical**
+**Phase 4 - Technical**
 10. Target platforms? (Web, Android, iOS, Desktop, Cross-platform)
 11. Preferred tech stack? (Or should I prescribe a stack based on the requirements?)
 12. Any existing codebase, legacy APIs, or external services to integrate with?
 13. Database preferences? (SQL vs NoSQL, local vs managed)
 14. Auth requirements? (Clerk, Firebase Auth, Supabase Auth, custom JWT, none)
 
-**Phase 5 — Deployment & Ops**
+**Phase 5 - Deployment & Ops**
 15. Deployment target? (Vercel, Netlify, Firebase, AWS, self-hosted VPS)
 16. Domain situation? (Have one? Need one? Preferred registrar?)
 17. Analytics needed? (GA4, Vercel Analytics, PostHog, custom, none)
 18. Any security or compliance requirements? (OWASP strictness, SOC2, HIPAA, PCI)
 
-**Phase 6 — Constraints**
+**Phase 6 - Constraints**
 19. Budget constraints? (Strict free tier only? Willing to pay for DX/speed?)
 20. Timeline expectations? (MVP, hackathon speed, production-grade slow burn)
 21. Any absolute hard rules? (e.g., No AI slop, strict linting, zero comments in code)

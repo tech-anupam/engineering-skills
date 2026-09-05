@@ -16,36 +16,36 @@
 | Provider | TTS Quality | STT Quality | Real-time | Cost | Best For |
 |---|---|---|---|---|---|
 | Google Cloud TTS | High (Neural2, Studio) | Excellent | Yes (streaming) | Low | Production TTS at scale |
-| Google Voice Engine | Experimental, very high | — | — | — | Ultra-natural voice |
+| Google Voice Engine | Experimental, very high | - | - | - | Ultra-natural voice |
 | Gemini Voice/Live | Good, improving | Good (native audio input) | Yes (bidirectional) | Medium | Multimodal voice apps |
-| OpenAI TTS | Very high (6 voices) | — | No | Medium | Simple high-quality TTS |
-| OpenAI Whisper | — | Excellent | Yes (API) / No (local) | Low/Free | Transcription, offline STT |
+| OpenAI TTS | Very high (6 voices) | - | No | Medium | Simple high-quality TTS |
+| OpenAI Whisper | - | Excellent | Yes (API) / No (local) | Low/Free | Transcription, offline STT |
 | OpenAI Realtime | Good | Good | Yes (bidirectional) | High | Real-time voice assistants |
-| ElevenLabs | Best (voice cloning) | — | Yes | High | Ultra-realistic, cloning |
-| Deepgram | — | Excellent | Yes (fastest) | Medium | Real-time transcription |
+| ElevenLabs | Best (voice cloning) | - | Yes | High | Ultra-realistic, cloning |
+| Deepgram | - | Excellent | Yes (fastest) | Medium | Real-time transcription |
 | Grok (xAI) | Emerging | Emerging | Emerging | TBD | Experimental voice |
 
 ## Fallback Chain Patterns
 
-### Pattern 1 — Cost-optimized
+### Pattern 1 - Cost-optimized
 For background processing, large-scale data extraction, or budget-constrained features.
 ```text
 Groq (Llama 3.1 70B) → Gemini 1.5 Flash → OpenAI GPT-4o-mini
 ```
 
-### Pattern 2 — Quality-optimized
+### Pattern 2 - Quality-optimized
 For complex coding tasks, intricate reasoning, or critical user-facing logic.
 ```text
 OpenAI GPT-4o → Gemini 1.5 Pro → Groq (Llama 3.1 70B)
 ```
 
-### Pattern 3 — Speed-optimized
+### Pattern 3 - Speed-optimized
 For real-time chat, autocomplete, or rapid agentic loops.
 ```text
 Groq (Llama 3.1 8B) → Gemini 1.5 Flash → OpenAI GPT-4o-mini
 ```
 
-### Pattern 4 — Voice pipeline
+### Pattern 4 - Voice pipeline
 For low-latency conversational agents.
 ```text
 STT: Deepgram (real-time) → Whisper (fallback)

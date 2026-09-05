@@ -1,4 +1,4 @@
-## Reusable component checklist — when to extract a component:
+## Reusable component checklist - when to extract a component:
 - **Navbar**: Always reusable. One navbar component, conditionally rendered per route if needed.
 - **Footer**: Always reusable.
 - **Button**: Always reusable. Use variants (primary, secondary, ghost, destructive) via props.

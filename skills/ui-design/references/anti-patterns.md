@@ -12,7 +12,7 @@ This document outlines the most common, lazy, or actively harmful design decisio
 ### The Floating Orbs
 **What it looks like**: Random blurry glowing circles floating in the background of dark-mode landing pages.
 **Why it's bad**: It's decorative noise that adds no value. It distracts from the content and is a hallmark of thoughtless template-driven design.
-**Alternative**: Use structural elements for visual interest—grids, typography, micro-interactions, or high-quality product photography.
+**Alternative**: Use structural elements for visual interest-grids, typography, micro-interactions, or high-quality product photography.
 
 ## 2. Layout Clichés
 

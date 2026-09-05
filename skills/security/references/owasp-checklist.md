@@ -1,101 +1,136 @@
-# OWASP Top 10 (2021) Detailed Checklist
+# OWASP Top 10 Detailed Checklist
 
 ## A01: Broken Access Control
-- **Description:** Failures where authenticated users can access unauthorized data or actions.
-- **Attack Example:** Changing a URL parameter from `user=123` to `user=124` to view another user's profile.
-- **Prevention Checklist:**
-  - [ ] Deny by default.
-  - [ ] Implement access control mechanisms once and reuse them throughout the application.
-  - [ ] Enforce record ownership.
-- **Next.js/React Mitigations:** Use middleware to protect routes.
-- **API Mitigations:** Validate permissions and ownership on every server-side API request.
-- **Insecure:**
-  ```javascript
-  const user = await db.users.find(req.query.userId);
-  ```
-- **Secure:**
-  ```javascript
-  const user = await db.users.find({ id: req.query.userId, ownerId: req.user.id });
-  ```
+Description: Failures where authenticated users can access unauthorized data or perform unauthorized actions. Attackers exploit these to view sensitive files, modify other users' data, or change access rights.
+Real-world impact: A regular user accesses `/admin` or modifies a URL parameter to delete someone else's account.
+Prevention checklist:
+- [ ] Implement Row Level Security (RLS) policies in Supabase for all tables.
+- [ ] Use Clerk middleware to protect private Next.js routes.
+- [ ] Verify user identity on every API route using `auth()` from Clerk.
+Code-level guidance:
+Do not rely on UI hiding. Always enforce checks on the server.
+```typescript
+const { userId } = auth()
+if (!userId) throw new Error("Unauthorized")
+const { data, error } = await supabase.from('profiles').select('*').eq('user_id', userId)
+```
 
 ## A02: Cryptographic Failures
-- **Description:** Failures related to cryptography leading to sensitive data exposure.
-- **Attack Example:** Intercepting unencrypted traffic over HTTP.
-- **Prevention Checklist:**
-  - [ ] Classify data processed, stored, or transmitted.
-  - [ ] Encrypt all sensitive data at rest and in transit.
-  - [ ] Use strong, up-to-date standard algorithms.
-- **Next.js/React Mitigations:** Only load assets over HTTPS.
-- **API Mitigations:** Enforce TLS/HTTPS. Use standard hashing (e.g., bcrypt) if handling passwords, though relying on Clerk is preferred.
+Description: Failures in protecting sensitive data in transit or at rest. This often results from using weak algorithms or mismanaging keys.
+Real-world impact: Attackers intercept unencrypted API traffic to steal session tokens or download cleartext credit card numbers.
+Prevention checklist:
+- [ ] Force HTTPS in production environments.
+- [ ] Store API keys in Vercel environment variables, never in code.
+- [ ] Let Clerk handle all password hashing and session cryptography.
+Code-level guidance:
+Use `.env.local` for local secrets and add `.env*` to `.gitignore`. Prefix public variables with `NEXT_PUBLIC_` only when the client absolutely needs them.
 
 ## A03: Injection
-- **Description:** Flaws like SQL, NoSQL, or Command Injection, where untrusted data is sent as part of a command or query.
-- **Attack Example:** Inputting `admin' --` into a login form to bypass auth.
-- **Prevention Checklist:**
-  - [ ] Use a safe API, which avoids the use of the interpreter entirely or provides a parameterized interface.
-  - [ ] Use positive or "whitelist" server-side input validation.
-- **Next.js/React Mitigations:** Avoid `dangerouslySetInnerHTML` unless input is sanitized via DOMPurify.
-- **API Mitigations:** Use ORMs like Prisma or Drizzle which handle parameterization by default.
+Description: Flaws where untrusted data is sent to an interpreter as part of a command or query. The interpreter executes unintended commands or accesses unauthorized data.
+Real-world impact: An attacker inputs SQL commands into a search box, dumping the entire user database.
+Prevention checklist:
+- [ ] Rely on Supabase's PostgREST API which uses parameterized queries by default.
+- [ ] Sanitize any user-generated HTML using DOMPurify before rendering.
+- [ ] Avoid `dangerouslySetInnerHTML` in React components.
+Code-level guidance:
+When using Supabase client, chain filters rather than concatenating strings.
+```typescript
+const { data } = await supabase.from('users').select().eq('username', userInput)
+```
 
 ## A04: Insecure Design
-- **Description:** Flaws stemming from missing or ineffective control design.
-- **Attack Example:** An e-commerce site allowing bulk purchases without rate limiting, leading to inventory exhaustion.
-- **Prevention Checklist:**
-  - [ ] Establish and use a secure development lifecycle.
-  - [ ] Use threat modeling for critical authentication, access control, and business logic.
-- **Next.js/React Mitigations:** Implement route guards and component-level authorization.
-- **API Mitigations:** Apply strict rate limiting and defense in depth on all endpoints.
+Description: Flaws stemming from missing or ineffective control design. It highlights the need for threat modeling and secure design principles.
+Real-world impact: A password reset flow allows unlimited guesses, enabling account takeover via brute force.
+Prevention checklist:
+- [ ] Enable rate limiting on critical API routes using Upstash or Vercel KV.
+- [ ] Require email verification during Clerk sign-up flows.
+- [ ] Validate all inputs against a Zod schema before processing.
+Code-level guidance:
+Wrap API payloads in Zod validation blocks.
+```typescript
+const schema = z.object({ email: z.string().email() })
+const parsed = schema.parse(req.body)
+```
 
 ## A05: Security Misconfiguration
-- **Description:** Insecure default settings, open cloud storage, misconfigured HTTP headers, and verbose error messages.
-- **Attack Example:** Accessing `/admin` directory because directory listing was left enabled.
-- **Prevention Checklist:**
-  - [ ] Implement a repeatable hardening process.
-  - [ ] Remove or do not install unused features and frameworks.
-- **Next.js/React Mitigations:** Configure `next.config.js` with secure HTTP headers.
-- **API Mitigations:** Disable detailed stack traces in production error responses.
+Description: Insecure default settings, incomplete configurations, or verbose error messages containing sensitive information. This happens across all layers of the stack.
+Real-world impact: An unhandled exception dumps a stack trace to the client, revealing database credentials or internal IP addresses.
+Prevention checklist:
+- [ ] Configure `next.config.js` to emit strict security headers.
+- [ ] Disable directory listings and public access to internal storage buckets in Supabase.
+- [ ] Ensure error messages sent to the client are generic.
+Code-level guidance:
+Catch errors at the API boundary and log the full error internally while returning a sanitized message.
+```typescript
+try {
+  await processPayment()
+} catch (error) {
+  console.error(error)
+  return res.status(500).json({ error: "Internal server error" })
+}
+```
 
 ## A06: Vulnerable Components
-- **Description:** Using components, such as libraries, frameworks, and other software modules, with known vulnerabilities.
-- **Attack Example:** Exploiting a known RCE in an outdated version of lodash or express.
-- **Prevention Checklist:**
-  - [ ] Remove unused dependencies, unnecessary features, components, files, and documentation.
-  - [ ] Continuously inventory the versions of both client-side and server-side components.
-- **Next.js/React Mitigations:** Regular `npm audit` checks.
-- **API Mitigations:** Pin dependencies and automate updates using tools like Dependabot.
+Description: Using components like libraries and frameworks with known vulnerabilities. Attackers scan for outdated software to exploit known flaws.
+Real-world impact: An outdated image parsing library allows remote code execution when a user uploads a malicious avatar.
+Prevention checklist:
+- [ ] Run `npm audit` in CI/CD pipelines.
+- [ ] Enable Dependabot on the GitHub repository.
+- [ ] Audit third-party React components for security track records before adding them.
+Code-level guidance:
+Remove unused dependencies from `package.json`. Do not install packages globally unless required for tooling.
 
-## A07: Authentication Failures
-- **Description:** Weaknesses in authentication and session management leading to identity theft.
-- **Attack Example:** Brute forcing a login page that has no rate limiting or lock-out mechanism.
-- **Prevention Checklist:**
-  - [ ] Where possible, implement multi-factor authentication.
-  - [ ] Do not deploy with any default credentials.
-- **Next.js/React Mitigations:** Integrate standard auth providers like Clerk.
-- **API Mitigations:** Ensure session cookies use `HttpOnly`, `Secure`, and `SameSite` flags.
+## A07: Identification and Authentication Failures
+Description: Weaknesses in authentication and session management leading to identity theft. Attackers compromise passwords, keys, or session tokens.
+Real-world impact: Credential stuffing attacks succeed because the application lacks multi-factor authentication and rate limiting.
+Prevention checklist:
+- [ ] Delegate authentication to Clerk.
+- [ ] Enable Multi-Factor Authentication (MFA) in the Clerk dashboard.
+- [ ] Set short session lifetimes for highly privileged roles.
+Code-level guidance:
+Check session validity rather than trusting client-side state.
+```typescript
+const { userId, sessionId } = auth()
+if (!userId || !sessionId) return new Response("Unauthorized", { status: 401 })
+```
 
-## A08: Software and Data Integrity
-- **Description:** Code and infrastructure that does not protect against integrity violations.
-- **Attack Example:** A compromised CDN serving malicious scripts that clients execute.
-- **Prevention Checklist:**
-  - [ ] Use digital signatures or similar mechanisms to verify software or data from external sources.
-  - [ ] Ensure libraries and dependencies are consuming trusted repositories.
-- **Next.js/React Mitigations:** Use Subresource Integrity (SRI) tags when loading scripts from CDNs.
-- **API Mitigations:** Enforce signed commits in the repository.
+## A08: Software and Data Integrity Failures
+Description: Code and infrastructure that does not protect against integrity violations. This includes pulling unverified plugins or lacking a secure CI/CD pipeline.
+Real-world impact: A compromised npm package injects a cryptocurrency miner into the build artifact.
+Prevention checklist:
+- [ ] Lock dependencies using `package-lock.json` or `pnpm-lock.yaml`.
+- [ ] Require signed commits for all repository contributors.
+- [ ] Review GitHub Actions workflows for excessive permissions.
+Code-level guidance:
+Avoid loading external scripts dynamically without Subresource Integrity (SRI) hashes.
+```html
+<script src="https://example.com/library.js" integrity="sha384-..." crossorigin="anonymous"></script>
+```
 
-## A09: Security Logging & Monitoring
-- **Description:** Insufficient logging and monitoring, allowing attackers to further extract or destroy data without detection.
-- **Attack Example:** An attacker probing an API for vulnerabilities over days without being noticed.
-- **Prevention Checklist:**
-  - [ ] Ensure all login, access control, and server-side input validation failures can be logged.
-  - [ ] Establish effective monitoring and alerting.
-- **Next.js/React Mitigations:** Log client-side exceptions to a monitoring service (e.g., Sentry).
-- **API Mitigations:** Centralize logs and set up automated alerts for high error rates.
+## A09: Security Logging and Monitoring Failures
+Description: Insufficient logging and monitoring allows attackers to extract data or compromise systems without detection. Breaches often go undiscovered for months.
+Real-world impact: An attacker exploits a vulnerability over several weeks, but no alerts trigger because failed logins are not logged.
+Prevention checklist:
+- [ ] Send application logs to a centralized service like Datadog or Vercel Logs.
+- [ ] Monitor Clerk for anomalous login attempts.
+- [ ] Alert the team on spikes in 500 errors from API routes.
+Code-level guidance:
+Use a structured logger rather than basic console outputs.
+```typescript
+logger.info("User login attempt", { userId, ipAddress: req.ip, success: false })
+```
 
 ## A10: Server-Side Request Forgery (SSRF)
-- **Description:** Flaws occurring when a web application fetches a remote resource without validating the user-supplied URL.
-- **Attack Example:** Supplying `http://localhost/admin` to a webhook URL field to access internal services.
-- **Prevention Checklist:**
-  - [ ] Enforce "deny by default" network policies.
-  - [ ] Sanitize and validate all client-supplied input data.
-- **Next.js/React Mitigations:** Avoid initiating network requests directly based on unvalidated user input in Server Components or API routes.
-- **API Mitigations:** Whitelist allowed domains for outbound requests.
+Description: Flaws occurring when a web application fetches a remote resource without validating the user-supplied URL. Attackers can force the server to make requests on their behalf.
+Real-world impact: An attacker passes an internal AWS metadata URL to an image fetcher, stealing cloud instance credentials.
+Prevention checklist:
+- [ ] Validate and sanitize all URLs provided by users before fetching them.
+- [ ] Restrict outbound network connections from the server to only required domains.
+- [ ] Avoid implementing generic proxy endpoints.
+Code-level guidance:
+Use an allowlist for external domains.
+```typescript
+const allowedDomains = ["api.stripe.com", "api.github.com"]
+const url = new URL(userInputUrl)
+if (!allowedDomains.includes(url.hostname)) throw new Error("Invalid domain")
+```
